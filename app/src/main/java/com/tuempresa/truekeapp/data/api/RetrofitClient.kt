@@ -1,0 +1,37 @@
+package com.tuempresa.truekeapp.data.api
+
+import com.google.gson.GsonBuilder
+import com.tuempresa.truekeapp.datastore.TokenDataStore
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
+object RetrofitClient {
+
+    private const val BASE_URL = "http://192.168.0.11:3000" // Ajusta a tu URL del servidor
+
+    fun create(tokenDataStore: TokenDataStore): TruekeApi {
+        val authInterceptor = AuthInterceptor(tokenDataStore)
+
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .addInterceptor(logging)
+            .build()
+
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(TruekeApi::class.java)
+    }
+}
