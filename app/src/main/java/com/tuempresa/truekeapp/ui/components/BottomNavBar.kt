@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/truekeapp/ui/components/BottomNavBar.kt
 package com.tuempresa.truekeapp.ui.components
 
 import androidx.compose.material.icons.Icons

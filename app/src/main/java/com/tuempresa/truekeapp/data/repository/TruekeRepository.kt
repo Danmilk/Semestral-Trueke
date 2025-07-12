@@ -24,7 +24,9 @@ class TruekeRepository(
         val body = RegisterRequest(email = email, password = password)
         return api.register(body)
     }
-
+    suspend fun getToken(): String? {
+        return tokenDataStore.getToken()
+    }
     /** Login y guardado del JWT */
     suspend fun login(email: String, password: String): ApiResponse<AuthData>? {
         val body = LoginRequest(email = email, password = password)
@@ -117,3 +119,5 @@ class TruekeRepository(
         }
     }
 }
+
+
