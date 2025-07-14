@@ -2,10 +2,18 @@ package com.tuempresa.truekeapp.ui.navigation
 
 import androidx.compose.runtime.Composable
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.tuempresa.truekeapp.data.model.ItemSharedViewModel
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.screens.*
 
@@ -22,12 +30,17 @@ sealed class Screen(val route: String) {
     object OfferItem : Screen("offer_item/{itemId}") {
         fun createRoute(itemId: String) = "offer_item/$itemId"
     }
+    object ItemDetail : Screen("item_detail/{itemId}") {
+        fun createRoute(itemId: String) = "item_detail/$itemId"
+    }
     object Settings : Screen("settings")
 }
 
 @Composable
 fun TruekeNavGraph(repository: TruekeRepository) {
     val navController = rememberNavController()
+    val itemSharedViewModel: ItemSharedViewModel = viewModel()
+
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
     composable(Screen.Splash.route) {
@@ -66,8 +79,12 @@ fun TruekeNavGraph(repository: TruekeRepository) {
                 onNavigateToReceived = { navController.navigate(Screen.OffersReceived.route) },
                 onNavigateToAccount = { navController.navigate(Screen.Account.route) },
                 onCreateItem = { navController.navigate(Screen.CreateItem.route) },
-                repository = repository
+                onItemClick = { itemId -> navController.navigate(Screen.ItemDetail.createRoute(itemId)) },
+                repository = repository,
+                itemSharedViewModel = itemSharedViewModel
+
             )
+
         }
         composable(Screen.OffersSent.route) {
             OffersSentScreen(
@@ -108,6 +125,32 @@ fun TruekeNavGraph(repository: TruekeRepository) {
                 onNavigateToReceived = { navController.navigate(Screen.OffersReceived.route) }
             )
         }
+        composable(
+            Screen.ItemDetail.route,
+            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
+            val item = itemSharedViewModel.getItem(itemId)
+
+            if (item != null) {
+                ItemDetailScreen(
+                    item = item,
+                    onOfferClick = { selectedItem ->
+                        navController.navigate(Screen.OfferItem.createRoute(selectedItem.id))
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            } else {
+                // Muestra mensaje si el item no fue encontrado
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Item no encontrado", color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
+
+
+
+
         composable(Screen.Inventory.route) {
             InventoryScreen(repository = repository,
                 onNavigateToHome = { navController.navigate(Screen.Home.route) },

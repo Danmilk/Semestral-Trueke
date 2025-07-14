@@ -90,5 +90,6 @@ dependencies {
 
     // DataStore Preferences para guardar el token JWT
     implementation(libs.androidx.datastore.preferences.v100)
+    implementation(libs.androidx.security.crypto)
 
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tuempresa.truekeapp.data.model.Item
+import com.tuempresa.truekeapp.data.model.ItemSharedViewModel
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.components.BottomNavBar
 import com.tuempresa.truekeapp.ui.components.ItemCard
@@ -20,16 +21,19 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    itemSharedViewModel: ItemSharedViewModel,
     onNavigateToSent: () -> Unit,
     onNavigateToReceived: () -> Unit,
     onNavigateToAccount: () -> Unit,
+    onItemClick: (String) -> Unit,
     onCreateItem: () -> Unit,
     repository: TruekeRepository
 ) {
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var items by remember { mutableStateOf<List<Item>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false)
+    }
 
     // Carga de items
     LaunchedEffect(Unit) {
@@ -91,7 +95,8 @@ fun HomeScreen(
                         ItemCard(
                             item = item,
                             onClick = {
-                                // Aquí luego irá la navegación a ItemDetailScreen
+                                itemSharedViewModel.setItem(item)  // Guardas el item
+                                onItemClick(item.id)
                             }
                         )
                     }

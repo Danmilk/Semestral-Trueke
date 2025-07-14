@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.tuempresa.truekeapp.data.model.Item
 import com.tuempresa.truekeapp.data.model.ItemMine
+import com.tuempresa.truekeapp.data.model.ItemSharedViewModel
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.components.LoadingIndicator
 import kotlinx.coroutines.launch

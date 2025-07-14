@@ -1,24 +1,37 @@
+// File: ui/screens/ItemDetailScreen.kt
 package com.tuempresa.truekeapp.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.tuempresa.truekeapp.data.model.Item
+import com.tuempresa.truekeapp.data.repository.TruekeRepository
+import com.tuempresa.truekeapp.ui.components.LoadingIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemDetailScreen(
     item: Item,
-    onOfferClick: (Item) -> Unit
+    onOfferClick: (Item) -> Unit,
+    onBack: () -> Unit
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Detalle del item") })
+            TopAppBar(
+                title = { Text("Detalle del item") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+                }
+            )
         }
     ) { innerPadding ->
         Column(

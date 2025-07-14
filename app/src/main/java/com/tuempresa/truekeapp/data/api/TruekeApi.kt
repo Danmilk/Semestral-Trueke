@@ -53,4 +53,11 @@ interface TruekeApi {
     suspend fun getOffers(
         @Path("itemId") itemId: String
     ): Response<ApiResponse<OffersResponse>>
+
+    @GET("/api/items/{id}")
+    suspend fun getItemById(
+        @Path("id") itemId: String
+    ): Response<ApiResponse<Item>>
+
+
 }

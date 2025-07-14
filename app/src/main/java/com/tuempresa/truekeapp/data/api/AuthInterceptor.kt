@@ -10,12 +10,31 @@ class AuthInterceptor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        // Obtiene el token de manera síncrona
-        val token = runBlocking { tokenDataStore.getToken() }
-        val requestBuilder = chain.request().newBuilder()
-        token?.let {
-            requestBuilder.addHeader("Authorization", "Bearer $it")
+        val request = chain.request()
+        val url = request.url.toString()
+
+        // Si es login o register, omite token
+        if (url.contains("/login") || url.contains("/register")) {
+            return chain.proceed(request)
         }
-        return chain.proceed(requestBuilder.build())
+
+        return runBlocking {
+            val token = tokenDataStore.getToken()
+
+            if (token != null) {
+                val isExpired = tokenDataStore.isTokenExpired()
+                if (isExpired) {
+                    tokenDataStore.clearToken()
+                } else {
+                    val newRequest = request.newBuilder()
+                        .addHeader("Authorization", "Bearer $token")
+                        .build()
+                    return@runBlocking chain.proceed(newRequest)
+                }
+            }
+
+            return@runBlocking chain.proceed(request)
+        }
     }
 }
+

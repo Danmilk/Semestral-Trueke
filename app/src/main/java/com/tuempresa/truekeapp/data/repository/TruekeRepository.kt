@@ -25,9 +25,11 @@ class TruekeRepository(
         val body = RegisterRequest(email = email, password = password)
         return api.register(body)
     }
-    suspend fun getToken(): String? {
-        return tokenDataStore.getToken()
-    }
+
+    suspend fun getToken(): String? = tokenDataStore.getToken()
+
+    suspend fun isTokenExpired(): Boolean = tokenDataStore.isTokenExpired()
+
     /** Login y guardado del JWT */
     suspend fun login(email: String, password: String): ApiResponse<AuthData>? {
         val body = LoginRequest(email = email, password = password)
@@ -101,12 +103,10 @@ class TruekeRepository(
     }
 
     /** Crear una oferta */
-    suspend fun createOffer(itemId: String, offeredItemIds: List<String>): ApiResponse<Unit>? {
+    suspend fun createOffer(itemId: String, offeredItemIds: List<String>) {
         val request = CreateOfferRequest(itemId = itemId, offeredItemIds = offeredItemIds)
         val response = api.createOffer(request)
-        if (response.isSuccessful) {
-            return response.body()?.data as ApiResponse<Unit>?
-        } else {
+        if (!response.isSuccessful) {
             throw Exception("Create offer failed: ${response.code()} ${response.message()}")
         }
     }

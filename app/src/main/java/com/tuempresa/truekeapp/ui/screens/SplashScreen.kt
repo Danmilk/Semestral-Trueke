@@ -23,12 +23,14 @@ fun SplashScreen(
         scope.launch {
             delay(1000) // pequeña pausa para que se vea el splash
             val token = repository.getToken()
-            if (token != null) {
+            val expired = repository.isTokenExpired()
+
+            if (token != null && !expired) {
                 onNavigateToHome()
             } else {
+                repository.logout() // elimina token si está expirado
                 onNavigateToLogin()
             }
-            checked = true
         }
     }
 
