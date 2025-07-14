@@ -64,6 +64,7 @@ dependencies {
 
     // Jetpack Compose y Material 3
     implementation(libs.androidx.core.ktx.v1120)
+    implementation(libs.androidx.foundation)
     implementation(libs.androidx.activity.compose.v190)
     implementation(libs.ui)
     implementation(libs.androidx.material.icons.extended)

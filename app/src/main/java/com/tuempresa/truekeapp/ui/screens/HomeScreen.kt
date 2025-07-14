@@ -1,8 +1,7 @@
 package com.tuempresa.truekeapp.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -10,12 +9,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
 import com.tuempresa.truekeapp.data.model.Item
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.components.BottomNavBar
-import com.tuempresa.truekeapp.ui.navigation.Screen
+import com.tuempresa.truekeapp.ui.components.ItemCard
 import com.tuempresa.truekeapp.ui.components.LoadingIndicator
+import com.tuempresa.truekeapp.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,20 +37,18 @@ fun HomeScreen(
         try {
             items = repository.getItems()
         } catch (e: Exception) {
-            // Puedes agregar logging o manejo de errores aquí
+            // Manejo de error opcional
         }
         isLoading = false
     }
 
     val filteredItems = items.filter {
-        it.title.contains(searchQuery.text, ignoreCase = true)
+        it.isMine != true && it.title.contains(searchQuery.text, ignoreCase = true)
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Trueke - Items") }
-            )
+            TopAppBar(title = { Text("Trueke - Items") })
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateItem) {
@@ -85,31 +82,21 @@ fun HomeScreen(
             if (isLoading) {
                 LoadingIndicator()
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(8.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     items(filteredItems) { item ->
-                        Card(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Row(modifier = Modifier.padding(12.dp)) {
-                                Image(
-                                    painter = rememberAsyncImagePainter(item.imageUrl),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(64.dp)
-                                        .padding(end = 12.dp)
-                                )
-                                Column {
-                                    Text(item.title, style = MaterialTheme.typography.titleMedium)
-                                    Text(item.description, style = MaterialTheme.typography.bodySmall)
-                                }
+                        ItemCard(
+                            item = item,
+                            onClick = {
+                                // Aquí luego irá la navegación a ItemDetailScreen
                             }
-                        }
+                        )
                     }
                 }
             }
-
         }
     }
 }

@@ -6,6 +6,7 @@ import com.tuempresa.truekeapp.data.model.AuthData
 import com.tuempresa.truekeapp.data.model.CreateOfferRequest
 import com.tuempresa.truekeapp.data.model.CreateItemResponse
 import com.tuempresa.truekeapp.data.model.Item
+import com.tuempresa.truekeapp.data.model.ItemMine
 import com.tuempresa.truekeapp.data.model.Offer
 import com.tuempresa.truekeapp.data.model.LoginRequest
 import com.tuempresa.truekeapp.data.model.RegisterRequest
@@ -67,7 +68,7 @@ class TruekeRepository(
             file = filePart
         )
         if (response.isSuccessful) {
-            return response.body()?.data as ApiResponse<CreateItemResponse>?
+            return response.body()
         } else {
             throw Exception("Create item failed: ${response.code()} ${response.message()}")
         }
@@ -84,14 +85,15 @@ class TruekeRepository(
     }
 
     /** Obtener lista de mis items */
-    suspend fun getMyItems(): List<Item> {
+    suspend fun getMyItems(): List<ItemMine> {
         val response = api.getMyItems()
         if (response.isSuccessful) {
-            return (response.body()?.data?.items ?: emptyList()) as List<Item>
+            return response.body()?.data?.items ?: emptyList()
         } else {
             throw Exception("Get my items failed: ${response.code()} ${response.message()}")
         }
     }
+
 
     /** Eliminar un item por ID */
     suspend fun deleteItem(itemId: String): Response<ApiResponse<Unit>> {

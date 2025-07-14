@@ -98,8 +98,8 @@ fun CreateItemScreen(
                             try {
                                 if (imageUri == null) throw Exception("Selecciona una imagen")
                                 val file = com.tuempresa.truekeapp.util.FileUtils.getFileFromUri(context, imageUri!!)
-                                val requestFile = file
-                                    .asRequestBody("image/*".toMediaTypeOrNull())
+                                val mimeType = context.contentResolver.getType(imageUri!!)
+                                val requestFile = file.asRequestBody(mimeType?.toMediaTypeOrNull())
                                 val imagePart = MultipartBody.Part.createFormData(
                                     "file", file.name, requestFile
                                 )

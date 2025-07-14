@@ -70,10 +70,23 @@ fun TruekeNavGraph(repository: TruekeRepository) {
             )
         }
         composable(Screen.OffersSent.route) {
-            OffersSentScreen(repository = repository)
+            OffersSentScreen(
+                repository = repository,
+                onNavigateToHome = { navController.navigate(Screen.Home.route) },
+                onNavigateToReceived = { navController.navigate(Screen.OffersReceived.route) },
+                onNavigateToAccount = { navController.navigate(Screen.Account.route) }
+            )
+
+
         }
         composable(Screen.OffersReceived.route) {
-            OffersReceivedScreen(repository = repository)
+            OffersReceivedScreen(
+                repository = repository,
+                onNavigateToHome = { navController.navigate(Screen.Home.route) },
+                onNavigateToSent = { navController.navigate(Screen.OffersSent.route) },
+                onNavigateToAccount = { navController.navigate(Screen.Account.route) }
+            )
+
         }
         composable(Screen.Account.route) {
             val scope = rememberCoroutineScope()
@@ -89,11 +102,21 @@ fun TruekeNavGraph(repository: TruekeRepository) {
                         }
                     }
                 },
-                repository = repository
+                repository = repository,
+                onNavigateToHome = { navController.navigate(Screen.Home.route) },
+                onNavigateToSent = { navController.navigate(Screen.OffersSent.route) },
+                onNavigateToReceived = { navController.navigate(Screen.OffersReceived.route) }
             )
         }
         composable(Screen.Inventory.route) {
-            InventoryScreen(repository = repository)
+            InventoryScreen(repository = repository,
+                onNavigateToHome = { navController.navigate(Screen.Home.route) },
+                onNavigateToSent = { navController.navigate(Screen.OffersSent.route) },
+                onCreateItem = { navController.navigate(Screen.CreateItem.route) },
+                onNavigateToReceived = { navController.navigate(Screen.OffersReceived.route)}
+
+            )
+
         }
         composable(Screen.CreateItem.route) {
             CreateItemScreen(
@@ -120,7 +143,10 @@ fun TruekeNavGraph(repository: TruekeRepository) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
                 },
-                repository = repository
+                repository = repository,
+                onNavigateToHome = { navController.navigate(Screen.Home.route) },
+                onNavigateToSent = { navController.navigate(Screen.OffersSent.route) },
+                onNavigateToReceived = { navController.navigate(Screen.OffersReceived.route) }
             )
         }
 

@@ -4,13 +4,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.tuempresa.truekeapp.data.model.Item
+import com.tuempresa.truekeapp.data.model.ItemMine
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.components.BottomNavBar
 import com.tuempresa.truekeapp.ui.components.LoadingIndicator
@@ -19,10 +21,16 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InventoryScreen(repository: TruekeRepository) {
+fun InventoryScreen(
+    repository: TruekeRepository,
+    onCreateItem: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToSent: () -> Unit,
+    onNavigateToReceived: () -> Unit
+) {
     val scope = rememberCoroutineScope()
-    var items by remember { mutableStateOf<List<Item>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(false) }
+    var items by remember { mutableStateOf<List<ItemMine>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
@@ -37,10 +45,23 @@ fun InventoryScreen(repository: TruekeRepository) {
         topBar = {
             TopAppBar(title = { Text("Mi Inventario") })
         },
+
+        floatingActionButton = {
+            FloatingActionButton(onClick = onCreateItem) {
+                Icon(Icons.Default.Add, contentDescription = "Nuevo item")
+            }
+        },
         bottomBar = {
             BottomNavBar(
                 currentRoute = Screen.Inventory.route,
-                onNavigate = { /* Opcional: puedes añadir navegación desde aquí si deseas */ }
+                onNavigate = { route ->
+                    when (route) {
+                        Screen.Home.route -> onNavigateToHome()
+                        Screen.OffersSent.route -> onNavigateToSent()
+                        Screen.OffersReceived.route -> onNavigateToReceived()
+                        // Ya estás en Inventario
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -116,7 +137,7 @@ fun InventoryScreen(repository: TruekeRepository) {
 
 private suspend fun loadMyItems(
     repository: TruekeRepository,
-    onResult: (Result<List<Item>>) -> Unit
+    onResult: (Result<List<ItemMine>>) -> Unit
 ) {
     runCatching {
         repository.getMyItems()

@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.tuempresa.truekeapp.data.model.Item
+import com.tuempresa.truekeapp.data.model.ItemMine
 import com.tuempresa.truekeapp.data.model.Offer
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.components.BottomNavBar
@@ -18,12 +18,18 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OffersReceivedScreen(repository: TruekeRepository) {
+fun OffersReceivedScreen(
+    repository: TruekeRepository,
+    onNavigateToHome: () -> Unit,
+    onNavigateToSent: () -> Unit,
+    onNavigateToAccount: () -> Unit
+) {
     val scope = rememberCoroutineScope()
-    var myItems by remember { mutableStateOf<List<Item>>(emptyList()) }
+    var myItems by remember { mutableStateOf<List<ItemMine>>(emptyList()) }
     var offersMap by remember { mutableStateOf<Map<String, List<Offer>>>(emptyMap()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
 
     LaunchedEffect(Unit) {
         try {
@@ -50,9 +56,16 @@ fun OffersReceivedScreen(repository: TruekeRepository) {
         bottomBar = {
             BottomNavBar(
                 currentRoute = Screen.OffersReceived.route,
-                onNavigate = { /* Puedes conectar navegación aquí si gustas */ }
+                onNavigate = { route ->
+                    when (route) {
+                        Screen.Home.route -> onNavigateToHome()
+                        Screen.OffersSent.route -> onNavigateToSent()
+                        Screen.Account.route -> onNavigateToAccount()
+                    }
+                }
             )
         }
+
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             if (isLoading) {

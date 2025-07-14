@@ -20,6 +20,9 @@ fun AccountScreen(
     onInventoryClick: () -> Unit,
     onSettingsClick: () -> Unit = {},
     onLogout: () -> Unit = {},
+    onNavigateToHome: () -> Unit,
+    onNavigateToSent: () -> Unit,
+    onNavigateToReceived: () -> Unit,
     repository: TruekeRepository
 ) {
     val scope = rememberCoroutineScope()
@@ -30,9 +33,17 @@ fun AccountScreen(
         bottomBar = {
             BottomNavBar(
                 currentRoute = Screen.Account.route,
-                onNavigate = { /* navegación entre tabs si es necesario */ }
+                onNavigate = { route ->
+                    when (route) {
+                        Screen.Home.route -> onNavigateToHome()
+                        Screen.OffersSent.route -> onNavigateToSent()
+                        Screen.OffersReceived.route -> onNavigateToReceived()
+                        // Ya estás en Cuenta
+                    }
+                }
             )
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier

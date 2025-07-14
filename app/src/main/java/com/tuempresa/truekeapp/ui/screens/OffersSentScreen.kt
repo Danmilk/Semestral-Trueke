@@ -12,7 +12,10 @@ import com.tuempresa.truekeapp.ui.navigation.Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OffersSentScreen(
-    repository: TruekeRepository
+    repository: TruekeRepository,
+    onNavigateToHome: () -> Unit,
+    onNavigateToReceived: () -> Unit,
+    onNavigateToAccount: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -21,9 +24,16 @@ fun OffersSentScreen(
         bottomBar = {
             BottomNavBar(
                 currentRoute = Screen.OffersSent.route,
-                onNavigate = { /* Agrega navegación si gustas */ }
+                onNavigate = { route ->
+                    when (route) {
+                        Screen.Home.route -> onNavigateToHome()
+                        Screen.OffersReceived.route -> onNavigateToReceived()
+                        Screen.Account.route -> onNavigateToAccount()
+                    }
+                }
             )
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier

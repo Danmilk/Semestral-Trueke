@@ -29,7 +29,11 @@ fun BottomNavBar(
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
-                onClick = { onNavigate(item.route) },
+                onClick = {
+                    if (currentRoute != item.route) {
+                        onNavigate(item.route)
+                    }
+                },
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 label = { Text(item.label) }
             )

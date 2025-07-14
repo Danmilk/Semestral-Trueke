@@ -6,8 +6,11 @@ data class Item(
     val description: String,
     val imageUrl: String,
     val status: String,
-    val ownerId: String
+    val ownerId: String,
+    val isMine: Boolean? = null,          // Solo está presente en /api/items
+    val owner: User? = null               // Solo está presente en /api/items
 )
+
 
 data class CreateItemResponse(
     val item: Item
@@ -17,7 +20,6 @@ data class ItemsListResponse(
     val items: List<Item>
 )
 
-// Extiende Item con campos extra si los necesitas
 data class ItemMine(
     val id: String,
     val title: String,

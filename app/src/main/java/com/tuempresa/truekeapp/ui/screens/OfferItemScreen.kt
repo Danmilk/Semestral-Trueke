@@ -12,6 +12,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.tuempresa.truekeapp.data.model.Item
+import com.tuempresa.truekeapp.data.model.ItemMine
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.components.LoadingIndicator
 import kotlinx.coroutines.launch
@@ -25,7 +26,7 @@ fun OfferItemScreen(
 ) {
     val scope = rememberCoroutineScope()
 
-    var myItems by remember { mutableStateOf<List<Item>>(emptyList()) }
+    var myItems by remember { mutableStateOf<List<ItemMine>>(emptyList()) }
     var selectedItemId by remember { mutableStateOf<String?>(null) }
     var targetItem by remember { mutableStateOf<Item?>(null) }
     var isLoading by remember { mutableStateOf(true) }
