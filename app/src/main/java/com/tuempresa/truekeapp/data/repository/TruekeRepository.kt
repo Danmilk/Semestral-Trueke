@@ -41,7 +41,6 @@ class TruekeRepository(
             }
             return apiResponse
         } else {
-            // Podrías mapear errores más finamente
             throw Exception("Login failed: ${response.code()} ${response.message()}")
         }
     }
@@ -61,12 +60,14 @@ class TruekeRepository(
     suspend fun createItem(
         title: String,
         description: String,
+        status: String,
         filePart: MultipartBody.Part
     ): ApiResponse<CreateItemResponse>? {
         // Prepara los campos como RequestBody si es necesario
         val response = api.createItem(
             title = RequestBody.create(MultipartBody.FORM, title),
             description = RequestBody.create(MultipartBody.FORM, description),
+            status = RequestBody.create(MultipartBody.FORM, status),
             file = filePart
         )
         if (response.isSuccessful) {
@@ -75,7 +76,22 @@ class TruekeRepository(
             throw Exception("Create item failed: ${response.code()} ${response.message()}")
         }
     }
-
+    suspend fun editItem(
+        itemId: String,
+        title: String,
+        description: String,
+        status: String,
+        filePart: MultipartBody.Part? = null
+    ): Response<ApiResponse<Item>> {
+        val response = api.editItem(
+            itemId = itemId,
+            title = RequestBody.create(MultipartBody.FORM, title),
+            description = RequestBody.create(MultipartBody.FORM, description),
+            status = RequestBody.create(MultipartBody.FORM, status),
+            file = filePart
+        )
+        return response
+    }
     /** Obtener lista de items disponibles */
     suspend fun getItems(): List<Item> {
         val response = api.getItems()
@@ -83,6 +99,14 @@ class TruekeRepository(
             return response.body()?.data?.items ?: emptyList()
         } else {
             throw Exception("Get items failed: ${response.code()} ${response.message()}")
+        }
+    }
+    suspend fun getMyOffers(): List<Offer> {
+        val response = api.getMyOffers()
+        if (response.isSuccessful) {
+            return response.body()?.data?.offers ?: emptyList()
+        } else {
+            throw Exception("Get my offers failed: ${response.code()} ${response.message()}")
         }
     }
 
@@ -120,6 +144,10 @@ class TruekeRepository(
             throw Exception("Get offers failed: ${response.code()} ${response.message()}")
         }
     }
+    suspend fun deleteOffer(offerId: String): Response<ApiResponse<Unit>> {
+        return api.deleteOffer(offerId)
+    }
+
 }
 
 

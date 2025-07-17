@@ -1,7 +1,6 @@
 package com.tuempresa.truekeapp.ui.screens
 
 import android.net.Uri
-import android.os.FileUtils
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -13,6 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.tuempresa.truekeapp.data.model.Item
+import com.tuempresa.truekeapp.data.model.ItemSharedViewModel
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
 import com.tuempresa.truekeapp.ui.components.LoadingIndicator
 import kotlinx.coroutines.launch
@@ -24,28 +25,35 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateItemScreen(
-    onItemCreated: () -> Unit,
-    repository: TruekeRepository
+fun EditItemScreen(
+    itemId: String,
+    itemSharedViewModel: ItemSharedViewModel,
+    repository: TruekeRepository,
+    onEditSuccess: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var title by remember { mutableStateOf(TextFieldValue("")) }
-    var description by remember { mutableStateOf(TextFieldValue("")) }
+    val item = itemSharedViewModel.getItem(itemId) ?: return
+
+    var title by remember { mutableStateOf(TextFieldValue(item.title)) }
+    var description by remember { mutableStateOf(TextFieldValue(item.description)) }
+    var selectedStatus by remember { mutableStateOf(item.status) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    val statusOptions = listOf("public", "private", "both")
+    var expanded by remember { mutableStateOf(false) }
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri = uri
-    }
+    ) { uri: Uri? -> imageUri = uri }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Nuevo Item") })
+            TopAppBar(title = { Text("Editar Item") })
         }
     ) { innerPadding ->
         if (isLoading) {
@@ -72,10 +80,8 @@ fun CreateItemScreen(
                     label = { Text("Descripción") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                val statusOptions = listOf("public", "private", "both")
-                var selectedStatus by remember { mutableStateOf(statusOptions[0]) }
-                var expanded by remember { mutableStateOf(false) }
 
+                // Dropdown de status
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded },
@@ -86,10 +92,11 @@ fun CreateItemScreen(
                         value = selectedStatus,
                         onValueChange = {},
                         label = { Text("Visibilidad") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
                         modifier = Modifier.menuAnchor()
                     )
-
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
@@ -106,23 +113,22 @@ fun CreateItemScreen(
                     }
                 }
 
-
                 Button(
                     onClick = { imagePickerLauncher.launch("image/*") },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Seleccionar Imagen")
+                    Text("Cambiar Imagen (opcional)")
                 }
 
-                imageUri?.let {
-                    Image(
-                        painter = rememberAsyncImagePainter(it),
-                        contentDescription = "Imagen seleccionada",
-                        modifier = Modifier
-                            .height(180.dp)
-                            .fillMaxWidth()
-                    )
-                }
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        imageUri ?: item.imageUrl
+                    ),
+                    contentDescription = "Imagen del item",
+                    modifier = Modifier
+                        .height(180.dp)
+                        .fillMaxWidth()
+                )
 
                 Button(
                     onClick = {
@@ -130,20 +136,30 @@ fun CreateItemScreen(
                             isLoading = true
                             errorMessage = null
                             try {
-                                if (imageUri == null) throw Exception("Selecciona una imagen")
-                                val file = com.tuempresa.truekeapp.util.FileUtils.getFileFromUri(context, imageUri!!)
-                                val mimeType = context.contentResolver.getType(imageUri!!)
-                                val requestFile = file.asRequestBody(mimeType?.toMediaTypeOrNull())
-                                val imagePart = MultipartBody.Part.createFormData(
-                                    "file", file.name, requestFile
+                                val titlePart = RequestBody.create(MultipartBody.FORM, title.text)
+                                val descPart = RequestBody.create(MultipartBody.FORM, description.text)
+                                val statusPart = RequestBody.create(MultipartBody.FORM, selectedStatus)
+
+                                val filePart = imageUri?.let {
+                                    val file = com.tuempresa.truekeapp.util.FileUtils.getFileFromUri(context, it)
+                                    val mime = context.contentResolver.getType(it)
+                                    val requestFile = file.asRequestBody(mime?.toMediaTypeOrNull())
+                                    MultipartBody.Part.createFormData("file", file.name, requestFile)
+                                }
+
+                                val response = repository.editItem(
+                                    itemId = item.id,
+                                    title = titlePart.toString(),
+                                    description = descPart.toString(),
+                                    status = statusPart.toString(),
+                                    filePart = filePart
                                 )
-                                repository.createItem(
-                                    title = title.text,
-                                    description = description.text,
-                                    status = selectedStatus,
-                                    filePart = imagePart
-                                )
-                                onItemCreated()
+
+                                if (response.isSuccessful) {
+                                    onEditSuccess()
+                                } else {
+                                    throw Exception("Error ${response.code()}: ${response.message()}")
+                                }
                             } catch (e: Exception) {
                                 errorMessage = e.message
                             } finally {
@@ -153,7 +169,7 @@ fun CreateItemScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Publicar")
+                    Text("Guardar cambios")
                 }
 
                 errorMessage?.let {

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -15,6 +16,8 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.tuempresa.truekeapp.data.model.ItemSharedViewModel
 import com.tuempresa.truekeapp.data.repository.TruekeRepository
+import com.tuempresa.truekeapp.data.model.toItem
+import com.tuempresa.truekeapp.session.SessionManager
 import com.tuempresa.truekeapp.ui.screens.*
 
 sealed class Screen(val route: String) {
@@ -25,6 +28,9 @@ sealed class Screen(val route: String) {
     object OffersReceived : Screen("offers_received")
     object Account : Screen("account")
     object Inventory : Screen("inventory")
+    object EditItem : Screen("edit_item/{itemId}") {
+        fun createRoute(itemId: String) = "edit_item/$itemId"
+    }
     object Splash : Screen("splash")
     object CreateItem : Screen("create_item")
     object OfferItem : Screen("offer_item/{itemId}") {
@@ -40,7 +46,13 @@ sealed class Screen(val route: String) {
 fun TruekeNavGraph(repository: TruekeRepository) {
     val navController = rememberNavController()
     val itemSharedViewModel: ItemSharedViewModel = viewModel()
-
+    LaunchedEffect(Unit) {
+        SessionManager.sessionExpired.collect {
+            navController.navigate(Screen.Login.route) {
+                popUpTo(Screen.Home.route) { inclusive = true }
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
     composable(Screen.Splash.route) {
@@ -148,6 +160,18 @@ fun TruekeNavGraph(repository: TruekeRepository) {
             }
         }
 
+        composable(
+            Screen.EditItem.route,
+            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
+            EditItemScreen(
+                itemId = itemId,
+                itemSharedViewModel = itemSharedViewModel,
+                repository = repository,
+                onEditSuccess = { navController.popBackStack() }
+            )
+        }
 
 
 
@@ -156,6 +180,10 @@ fun TruekeNavGraph(repository: TruekeRepository) {
                 onNavigateToHome = { navController.navigate(Screen.Home.route) },
                 onNavigateToSent = { navController.navigate(Screen.OffersSent.route) },
                 onCreateItem = { navController.navigate(Screen.CreateItem.route) },
+                onEditItem = { item ->
+                    itemSharedViewModel.setItem(item.toItem()) // si necesitas convertir de ItemMine a Item
+                    navController.navigate(Screen.EditItem.createRoute(item.id))
+                },
                 onNavigateToReceived = { navController.navigate(Screen.OffersReceived.route)}
 
             )
