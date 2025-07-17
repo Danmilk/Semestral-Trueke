@@ -29,8 +29,10 @@ interface TruekeApi {
     suspend fun createItem(
         @Part("title") title: RequestBody,
         @Part("description") description: RequestBody,
+        @Part("status") status: RequestBody, // <-- NUEVO
         @Part file: MultipartBody.Part
     ): Response<ApiResponse<CreateItemResponse>>
+
 
     @GET("/api/items")
     suspend fun getItems(): Response<ApiResponse<ItemsListResponse>>
@@ -54,10 +56,23 @@ interface TruekeApi {
         @Path("itemId") itemId: String
     ): Response<ApiResponse<OffersResponse>>
 
-    @GET("/api/items/{id}")
-    suspend fun getItemById(
-        @Path("id") itemId: String
+    @Multipart
+    @PUT("/api/items/{id}")
+    suspend fun editItem(
+        @Path("id") itemId: String,
+        @Part("title") title: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part("status") status: RequestBody,
+        @Part file: MultipartBody.Part? = null
     ): Response<ApiResponse<Item>>
+
+    @DELETE("/api/offers/{offerId}")
+    suspend fun deleteOffer(
+        @Path("offerId") offerId: String
+    ): Response<ApiResponse<Unit>>
+
+    @GET("/api/offers/mine")
+    suspend fun getMyOffers(): Response<ApiResponse<OffersResponse>>
 
 
 }

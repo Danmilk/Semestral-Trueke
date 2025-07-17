@@ -26,22 +26,42 @@ class TokenDataStore(context: Context) {
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
-
+    private val TIMESTAMP_KEY = "token_timestamp"
     suspend fun saveToken(token: String) = withContext(Dispatchers.IO) {
-        sharedPreferences.edit().putString(TOKEN_KEY, token).apply()
+        val now = System.currentTimeMillis()
+        sharedPreferences.edit()
+            .putString(TOKEN_KEY, token)
+            .putLong(TIMESTAMP_KEY, now)
+            .apply()
     }
 
     suspend fun clearToken() = withContext(Dispatchers.IO) {
-        sharedPreferences.edit().remove(TOKEN_KEY).apply()
+        sharedPreferences.edit()
+            .remove(TOKEN_KEY)
+            .remove(TIMESTAMP_KEY)
+            .apply()
     }
+
 
     suspend fun getToken(): String? = withContext(Dispatchers.IO) {
         sharedPreferences.getString(TOKEN_KEY, null)
     }
 
+
+
+    private val EXPIRATION_WINDOW_MILLIS = 5 * 60 * 1000 // 5 minutos
+
     suspend fun isTokenExpired(): Boolean = withContext(Dispatchers.IO) {
         val token = getToken() ?: return@withContext true
 
+        val savedTime = sharedPreferences.getLong(TIMESTAMP_KEY, -1L)
+        val now = System.currentTimeMillis()
+
+        if (savedTime != -1L && now - savedTime > EXPIRATION_WINDOW_MILLIS) {
+            return@withContext true
+        }
+
+        // Validación opcional con exp del JWT (puedes mantenerla si quieres)
         try {
             val parts = token.split(".")
             if (parts.size != 3) return@withContext true
@@ -50,11 +70,12 @@ class TokenDataStore(context: Context) {
             val payload = JSONObject(payloadJson)
 
             val exp = payload.getLong("exp")
-            val now = System.currentTimeMillis() / 1000
-            return@withContext now >= exp
+            val nowSeconds = now / 1000
+            return@withContext nowSeconds >= exp
         } catch (e: Exception) {
             e.printStackTrace()
             return@withContext true
         }
     }
+
 }

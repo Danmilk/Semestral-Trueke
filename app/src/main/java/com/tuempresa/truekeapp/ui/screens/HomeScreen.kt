@@ -47,8 +47,11 @@ fun HomeScreen(
     }
 
     val filteredItems = items.filter {
-        it.isMine != true && it.title.contains(searchQuery.text, ignoreCase = true)
+        it.isMine != true &&
+                (it.status == "public" || it.status == "both") &&
+                it.title.contains(searchQuery.text, ignoreCase = true)
     }
+
 
     Scaffold(
         topBar = {

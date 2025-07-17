@@ -13,6 +13,7 @@ data class OfferedItem(
 
 data class Offer(
     val id: String,
+    val item: OfferedItem,
     val offeredBy: User,
     val offeredItems: List<OfferedItem>
 )

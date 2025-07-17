@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -26,6 +27,7 @@ fun InventoryScreen(
     onCreateItem: () -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToSent: () -> Unit,
+    onEditItem: (ItemMine) -> Unit,
     onNavigateToReceived: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -101,20 +103,30 @@ fun InventoryScreen(
                                         Column {
                                             Text(item.title, style = MaterialTheme.typography.titleMedium)
                                             Text(item.description, style = MaterialTheme.typography.bodySmall)
+                                            Text("Visibilidad: ${item.status}", style = MaterialTheme.typography.labelSmall)
                                         }
                                     }
-                                    IconButton(onClick = {
-                                        scope.launch {
-                                            try {
-                                                repository.deleteItem(item.id)
-                                                items = items.filterNot { it.id == item.id }
-                                            } catch (e: Exception) {
-                                                errorMessage = e.message
+                                    Row {
+                                        IconButton(onClick = {
+                                            onEditItem(item)
+                                        }) {
+                                            Icon(Icons.Default.Edit, contentDescription = "Editar")
+                                        }
+
+                                        IconButton(onClick = {
+                                            scope.launch {
+                                                try {
+                                                    repository.deleteItem(item.id)
+                                                    items = items.filterNot { it.id == item.id }
+                                                } catch (e: Exception) {
+                                                    errorMessage = e.message
+                                                }
                                             }
+                                        }) {
+                                            Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                                         }
-                                    }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                                     }
+
                                 }
                             }
                         }
