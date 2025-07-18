@@ -146,7 +146,7 @@ fun OfferItemScreen(
                     }
                 } ?: run {
                     Text(
-                        text = "No se encontró el item objetivo.",
+                        text = "",
                         modifier = Modifier.padding(24.dp)
                     )
                 }
