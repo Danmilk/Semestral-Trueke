@@ -12,10 +12,15 @@
 ## Estructura del proyecto
 app/
 └─ src/main/java/com/tuempresa/truekeapp/
+
 ├─ data/ # Definiciones de API, modelos y repositorio
+
 ├─ datastore/ # TokenDataStore para persistencia segura de JWT
+
 ├─ session/ # SessionManager para manejar expiración de sesión
+
 ├─ ui/ # Pantallas, componentes y navegación con Compose
+
 └─ MainActivity.kt
 
 
