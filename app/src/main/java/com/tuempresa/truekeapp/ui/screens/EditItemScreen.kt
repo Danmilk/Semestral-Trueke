@@ -44,7 +44,7 @@ fun EditItemScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val statusOptions = listOf("public", "private", "both")
+    val statusOptions = listOf("disponible", "privado", "ambos")
     var expanded by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -149,11 +149,12 @@ fun EditItemScreen(
 
                                 val response = repository.editItem(
                                     itemId = item.id,
-                                    title = titlePart.toString(),
-                                    description = descPart.toString(),
-                                    status = statusPart.toString(),
+                                    title = title.text,
+                                    description = description.text,
+                                    status = selectedStatus,
                                     filePart = filePart
                                 )
+
 
                                 if (response.isSuccessful) {
                                     onEditSuccess()

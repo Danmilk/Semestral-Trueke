@@ -19,41 +19,43 @@ fun ItemCard(
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth()
-            .aspectRatio(1f) // Mantiene la tarjeta cuadrada
+            .aspectRatio(1f) // Mantiene todas las tarjetas cuadradas
             .clickable { onClick() }
     ) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize()
-        ) {
-            // Imagen uniforme con crop
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            // Imagen cuadrada
             Image(
                 painter = rememberAsyncImagePainter(item.imageUrl),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f), // Imagen cuadrada
-                contentScale = ContentScale.Crop // Recorta y centra
+                    .weight(1f), // Imagen toma la mitad superior
+                contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            item.owner?.email?.let {
+            // Contenido textual en la parte inferior
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 Text(
-                    text = "Por: $it",
-                    style = MaterialTheme.typography.labelSmall,
+                    text = item.title,
+                    style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                item.owner?.email?.let {
+                    Text(
+                        text = "Por: $it",
+                        style = MaterialTheme.typography.labelSmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }

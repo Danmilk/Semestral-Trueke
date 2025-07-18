@@ -72,7 +72,7 @@ fun CreateItemScreen(
                     label = { Text("Descripción") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                val statusOptions = listOf("public", "private", "both")
+                val statusOptions = listOf("disponible", "privado", "ambos")
                 var selectedStatus by remember { mutableStateOf(statusOptions[0]) }
                 var expanded by remember { mutableStateOf(false) }
 

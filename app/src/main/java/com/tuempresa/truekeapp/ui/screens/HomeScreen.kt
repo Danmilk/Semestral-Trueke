@@ -47,10 +47,13 @@ fun HomeScreen(
     }
 
     val filteredItems = items.filter {
-        it.isMine != true &&
-                (it.status == "public" || it.status == "both") &&
+        val s = it.status?.lowercase().orEmpty()
+        !it.isMine!! && (s == "disponible" || s == "ambos") &&
                 it.title.contains(searchQuery.text, ignoreCase = true)
     }
+
+
+
 
 
     Scaffold(

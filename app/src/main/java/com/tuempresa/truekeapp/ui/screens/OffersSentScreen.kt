@@ -143,7 +143,7 @@ fun OffersSentScreen(
                                             scope.launch {
                                                 try {
                                                     repository.deleteOffer(offer.id)
-                                                    offers = offers.filterNot { it.id == offer.id }
+                                                    offers = repository.getMyOffers()
                                                 } catch (e: Exception) {
                                                     errorMessage = "Error al eliminar oferta: ${e.message}"
                                                 }

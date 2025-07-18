@@ -14,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
 
     private const val BASE_URL =
-        "https://trueke-api-bgoo.onrender.com/api-docs/" // Ajusta a tu URL del servidor
+        "https://trueke-api-bgoo.onrender.com" // Ajusta a tu URL del servidor
 
     fun create(tokenDataStore: TokenDataStore): TruekeApi {
         val authInterceptor = AuthInterceptor(tokenDataStore)
